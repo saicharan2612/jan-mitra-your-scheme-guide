@@ -64,7 +64,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = (key: TranslationKey): string => {
-    return translations[language][key] || translations.en[key] || key;
+    const langTranslations = translations[language as keyof typeof translations];
+    if (langTranslations && langTranslations[key]) {
+      return langTranslations[key];
+    }
+    return translations.en[key] || key;
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
