@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,11 +19,11 @@ import { useState } from "react";
 export default function Sidebar() {
   const { t, user, logout } = useApp();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { path: "/dashboard", label: t("home"), icon: Home },
-    { path: "/profile", label: t("profile"), icon: User },
     { path: "/deadlines", label: t("deadlines"), icon: Clock },
     { path: "/schemes", label: t("schemes"), icon: BookOpen },
     { path: "/bookmarks", label: t("bookmarks"), icon: Bookmark },
@@ -116,6 +116,7 @@ export default function Sidebar() {
               onClick={() => {
                 logout();
                 setIsOpen(false);
+                navigate("/");
               }}
               className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
             >
