@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { schemes } from "@/data/schemes";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { t, user, language, bookmarkedSchemes } = useApp();
   const [searchQuery, setSearchQuery] = useState("");
   const [showChatbot, setShowChatbot] = useState(false);
@@ -163,6 +165,8 @@ export default function DashboardPage() {
               getTitle={getTitle}
               getDescription={getDescription}
               urgent
+              showViewAll
+              onViewAll={() => navigate("/deadlines")}
             />
           )}
 
@@ -174,6 +178,7 @@ export default function DashboardPage() {
             getTitle={getTitle}
             getDescription={getDescription}
             showViewAll
+            onViewAll={() => navigate("/schemes")}
           />
 
           {/* New Schemes */}
@@ -245,6 +250,7 @@ function Section({
   getDescription,
   showViewAll,
   urgent,
+  onViewAll,
 }: {
   title: string;
   icon: React.ReactNode;
@@ -253,6 +259,7 @@ function Section({
   getDescription: (s: typeof schemes[0]) => string;
   showViewAll?: boolean;
   urgent?: boolean;
+  onViewAll?: () => void;
 }) {
   if (schemes.length === 0) return null;
 
@@ -264,7 +271,7 @@ function Section({
           {title}
         </h2>
         {showViewAll && (
-          <Button variant="ghost" size="sm" className="text-primary">
+          <Button variant="ghost" size="sm" className="text-primary" onClick={onViewAll}>
             View All <ChevronRight className="h-4 w-4" />
           </Button>
         )}
