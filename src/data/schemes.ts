@@ -21,6 +21,8 @@ export interface Scheme {
   type: "scholarship" | "welfare" | "subsidy" | "pension";
   documents: string[];
   websiteUrl: string;
+  applicationProcess: string[];
+  applicationProcessHi: string[];
 }
 
 export const schemes: Scheme[] = [
@@ -43,6 +45,26 @@ export const schemes: Scheme[] = [
     type: "scholarship",
     documents: ["Caste Certificate", "Income Certificate", "Marksheet", "Bank Passbook", "Aadhaar Card"],
     websiteUrl: "https://scholarships.gov.in/",
+    applicationProcess: [
+      "Visit the National Scholarship Portal (scholarships.gov.in)",
+      "Register with your mobile number and email",
+      "Complete the One Time Registration (OTR)",
+      "Login and select 'Post Matric Scholarship for SC'",
+      "Fill in personal, academic, and bank details",
+      "Upload required documents (max 200KB each)",
+      "Submit application and note the Application ID",
+      "Track application status using the Application ID"
+    ],
+    applicationProcessHi: [
+      "राष्ट्रीय छात्रवृत्ति पोर्टल (scholarships.gov.in) पर जाएं",
+      "अपने मोबाइल नंबर और ईमेल से पंजीकरण करें",
+      "वन टाइम रजिस्ट्रेशन (OTR) पूरा करें",
+      "लॉगिन करें और 'एससी के लिए पोस्ट मैट्रिक छात्रवृत्ति' चुनें",
+      "व्यक्तिगत, शैक्षणिक और बैंक विवरण भरें",
+      "आवश्यक दस्तावेज़ अपलोड करें (अधिकतम 200KB प्रत्येक)",
+      "आवेदन जमा करें और आवेदन आईडी नोट करें",
+      "आवेदन आईडी का उपयोग करके आवेदन की स्थिति ट्रैक करें"
+    ],
   },
   {
     id: "2",
@@ -62,6 +84,24 @@ export const schemes: Scheme[] = [
     type: "welfare",
     documents: ["Aadhaar Card", "Land Records", "Bank Passbook"],
     websiteUrl: "https://pmkisan.gov.in/",
+    applicationProcess: [
+      "Visit pmkisan.gov.in official portal",
+      "Click on 'New Farmer Registration'",
+      "Select your state and enter Aadhaar number",
+      "Fill in land and personal details",
+      "Upload land records and bank passbook",
+      "Submit and get registration number",
+      "Check beneficiary status using registration number"
+    ],
+    applicationProcessHi: [
+      "pmkisan.gov.in आधिकारिक पोर्टल पर जाएं",
+      "'नया किसान पंजीकरण' पर क्लिक करें",
+      "अपना राज्य चुनें और आधार नंबर दर्ज करें",
+      "भूमि और व्यक्तिगत विवरण भरें",
+      "भूमि रिकॉर्ड और बैंक पासबुक अपलोड करें",
+      "जमा करें और पंजीकरण संख्या प्राप्त करें",
+      "पंजीकरण संख्या का उपयोग करके लाभार्थी स्थिति जांचें"
+    ],
   },
   {
     id: "3",
@@ -81,6 +121,26 @@ export const schemes: Scheme[] = [
     type: "subsidy",
     documents: ["Aadhaar Card", "Income Certificate", "BPL Card", "Land Documents"],
     websiteUrl: "https://pmaymis.gov.in/",
+    applicationProcess: [
+      "Visit pmaymis.gov.in portal",
+      "Click on 'Citizen Assessment'",
+      "Select 'Benefits under other 3 components'",
+      "Enter Aadhaar number for verification",
+      "Fill in family and income details",
+      "Upload required documents",
+      "Submit application and note reference number",
+      "Track status on the portal"
+    ],
+    applicationProcessHi: [
+      "pmaymis.gov.in पोर्टल पर जाएं",
+      "'नागरिक मूल्यांकन' पर क्लिक करें",
+      "'अन्य 3 घटकों के तहत लाभ' चुनें",
+      "सत्यापन के लिए आधार नंबर दर्ज करें",
+      "परिवार और आय विवरण भरें",
+      "आवश्यक दस्तावेज़ अपलोड करें",
+      "आवेदन जमा करें और संदर्भ संख्या नोट करें",
+      "पोर्टल पर स्थिति ट्रैक करें"
+    ],
   },
   {
     id: "4",
@@ -100,6 +160,26 @@ export const schemes: Scheme[] = [
     type: "scholarship",
     documents: ["Marksheet", "Income Certificate", "Aadhaar Card", "Bank Passbook"],
     websiteUrl: "https://scholarships.gov.in/",
+    applicationProcess: [
+      "Register on National Scholarship Portal",
+      "Login and select NMMS scholarship",
+      "Fill academic and personal details",
+      "Upload Class 8 marksheet",
+      "Upload income certificate (below ₹3.5 lakh)",
+      "Submit application online",
+      "Application verified by school and district",
+      "Track status using Application ID"
+    ],
+    applicationProcessHi: [
+      "राष्ट्रीय छात्रवृत्ति पोर्टल पर पंजीकरण करें",
+      "लॉगिन करें और NMMS छात्रवृत्ति चुनें",
+      "शैक्षणिक और व्यक्तिगत विवरण भरें",
+      "कक्षा 8 की मार्कशीट अपलोड करें",
+      "आय प्रमाण पत्र अपलोड करें (₹3.5 लाख से कम)",
+      "ऑनलाइन आवेदन जमा करें",
+      "स्कूल और जिले द्वारा आवेदन सत्यापित",
+      "आवेदन आईडी का उपयोग करके स्थिति ट्रैक करें"
+    ],
   },
   {
     id: "5",
@@ -120,6 +200,24 @@ export const schemes: Scheme[] = [
     type: "pension",
     documents: ["Aadhaar Card", "Bank Passbook", "Mobile Number"],
     websiteUrl: "https://www.npscra.nsdl.co.in/",
+    applicationProcess: [
+      "Visit your bank branch with documents",
+      "Fill APY registration form",
+      "Choose pension amount (₹1000-5000)",
+      "Link Aadhaar and mobile number",
+      "Set up auto-debit from bank account",
+      "Get PRAN (Permanent Retirement Account Number)",
+      "Monthly contributions auto-debited till age 60"
+    ],
+    applicationProcessHi: [
+      "दस्तावेजों के साथ अपनी बैंक शाखा जाएं",
+      "APY पंजीकरण फॉर्म भरें",
+      "पेंशन राशि चुनें (₹1000-5000)",
+      "आधार और मोबाइल नंबर लिंक करें",
+      "बैंक खाते से ऑटो-डेबिट सेट करें",
+      "PRAN (स्थायी सेवानिवृत्ति खाता संख्या) प्राप्त करें",
+      "60 वर्ष तक मासिक योगदान ऑटो-डेबिट"
+    ],
   },
   {
     id: "6",
@@ -139,6 +237,24 @@ export const schemes: Scheme[] = [
     type: "welfare",
     documents: ["Birth Certificate", "Aadhaar Card", "Parent's ID Proof", "Address Proof"],
     websiteUrl: "https://www.indiapost.gov.in/",
+    applicationProcess: [
+      "Visit nearest Post Office or authorized bank",
+      "Fill SSY account opening form",
+      "Attach girl child's birth certificate",
+      "Submit parent's ID and address proof",
+      "Deposit minimum ₹250 to open account",
+      "Get SSY passbook",
+      "Deposit yearly (min ₹250, max ₹1.5 lakh)"
+    ],
+    applicationProcessHi: [
+      "नजदीकी डाकघर या अधिकृत बैंक जाएं",
+      "SSY खाता खोलने का फॉर्म भरें",
+      "बालिका का जन्म प्रमाण पत्र संलग्न करें",
+      "माता-पिता की आईडी और पता प्रमाण जमा करें",
+      "खाता खोलने के लिए न्यूनतम ₹250 जमा करें",
+      "SSY पासबुक प्राप्त करें",
+      "वार्षिक जमा करें (न्यूनतम ₹250, अधिकतम ₹1.5 लाख)"
+    ],
   },
   {
     id: "7",
@@ -158,6 +274,26 @@ export const schemes: Scheme[] = [
     type: "welfare",
     documents: ["Aadhaar Card", "Ration Card", "Passport Photo", "Bank Passbook"],
     websiteUrl: "https://nrega.nic.in/",
+    applicationProcess: [
+      "Visit Gram Panchayat office",
+      "Fill job card application form",
+      "Submit Aadhaar and ration card copy",
+      "Attach passport size photographs",
+      "Gram Panchayat verifies application",
+      "Job card issued within 15 days",
+      "Request work in writing to Gram Panchayat",
+      "Work assigned within 15 days of request"
+    ],
+    applicationProcessHi: [
+      "ग्राम पंचायत कार्यालय जाएं",
+      "जॉब कार्ड आवेदन फॉर्म भरें",
+      "आधार और राशन कार्ड की कॉपी जमा करें",
+      "पासपोर्ट आकार की तस्वीरें संलग्न करें",
+      "ग्राम पंचायत आवेदन सत्यापित करती है",
+      "15 दिनों के भीतर जॉब कार्ड जारी",
+      "ग्राम पंचायत को लिखित में काम का अनुरोध करें",
+      "अनुरोध के 15 दिनों के भीतर काम सौंपा जाता है"
+    ],
   },
   {
     id: "8",
@@ -178,6 +314,26 @@ export const schemes: Scheme[] = [
     type: "scholarship",
     documents: ["OBC Certificate", "Income Certificate", "Marksheet", "Aadhaar Card"],
     websiteUrl: "https://scholarships.gov.in/",
+    applicationProcess: [
+      "Register on National Scholarship Portal",
+      "Complete One Time Registration (OTR)",
+      "Login and select Pre-Matric OBC scholarship",
+      "Fill student and family details",
+      "Upload OBC and income certificates",
+      "Upload previous year marksheet",
+      "School verifies and forwards application",
+      "Track status with Application ID"
+    ],
+    applicationProcessHi: [
+      "राष्ट्रीय छात्रवृत्ति पोर्टल पर पंजीकरण करें",
+      "वन टाइम रजिस्ट्रेशन (OTR) पूरा करें",
+      "लॉगिन करें और प्री-मैट्रिक OBC छात्रवृत्ति चुनें",
+      "छात्र और परिवार का विवरण भरें",
+      "OBC और आय प्रमाण पत्र अपलोड करें",
+      "पिछले वर्ष की मार्कशीट अपलोड करें",
+      "स्कूल सत्यापित करता है और आवेदन अग्रेषित करता है",
+      "आवेदन आईडी के साथ स्थिति ट्रैक करें"
+    ],
   },
 ];
 
