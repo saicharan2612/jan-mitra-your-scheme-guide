@@ -100,3 +100,14 @@ export const categories = [
   { value: "st", label: "ST", labelHi: "एसटी" },
   { value: "ews", label: "EWS", labelHi: "ईडब्ल्यूएस" },
 ];
+
+export const qualifications = [
+  { value: "below-10th", label: "Below 10th" },
+  { value: "10th-pass", label: "10th Pass" },
+  { value: "12th-pass", label: "12th Pass" },
+  { value: "graduate", label: "Graduate" },
+  { value: "post-graduate", label: "Post Graduate" },
+  { value: "diploma", label: "Diploma" },
+  { value: "iti", label: "ITI" },
+  { value: "phd", label: "PhD" },
+];

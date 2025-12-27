@@ -11,12 +11,16 @@ export interface Scheme {
     category?: string[];
     gender?: string[];
     state?: string[];
+    minAge?: number;
+    maxAge?: number;
+    occupation?: string[];
   };
   benefits: string;
   benefitsHi: string;
   status: "new" | "ongoing" | "closing-soon";
   type: "scholarship" | "welfare" | "subsidy" | "pension";
   documents: string[];
+  websiteUrl: string;
 }
 
 export const schemes: Scheme[] = [
@@ -31,12 +35,14 @@ export const schemes: Scheme[] = [
     eligibility: {
       income: ["below-1-lakh", "1-2.5-lakh"],
       category: ["sc"],
+      maxAge: 35,
     },
     benefits: "Full tuition fee + ₹1,200/month stipend",
     benefitsHi: "पूर्ण शुल्क + ₹1,200/माह वजीफा",
     status: "ongoing",
     type: "scholarship",
     documents: ["Caste Certificate", "Income Certificate", "Marksheet", "Bank Passbook", "Aadhaar Card"],
+    websiteUrl: "https://scholarships.gov.in/",
   },
   {
     id: "2",
@@ -48,12 +54,14 @@ export const schemes: Scheme[] = [
     deadline: "2025-03-31",
     eligibility: {
       income: ["below-1-lakh", "1-2.5-lakh", "2.5-5-lakh"],
+      occupation: ["farmer", "agriculture"],
     },
     benefits: "₹6,000/year in 3 installments",
     benefitsHi: "3 किस्तों में ₹6,000/वर्ष",
     status: "ongoing",
     type: "welfare",
     documents: ["Aadhaar Card", "Land Records", "Bank Passbook"],
+    websiteUrl: "https://pmkisan.gov.in/",
   },
   {
     id: "3",
@@ -72,6 +80,7 @@ export const schemes: Scheme[] = [
     status: "ongoing",
     type: "subsidy",
     documents: ["Aadhaar Card", "Income Certificate", "BPL Card", "Land Documents"],
+    websiteUrl: "https://pmaymis.gov.in/",
   },
   {
     id: "4",
@@ -83,12 +92,14 @@ export const schemes: Scheme[] = [
     deadline: "2025-02-15",
     eligibility: {
       income: ["below-1-lakh", "1-2.5-lakh"],
+      maxAge: 18,
     },
     benefits: "₹12,000/year",
     benefitsHi: "₹12,000/वर्ष",
     status: "closing-soon",
     type: "scholarship",
     documents: ["Marksheet", "Income Certificate", "Aadhaar Card", "Bank Passbook"],
+    websiteUrl: "https://scholarships.gov.in/",
   },
   {
     id: "5",
@@ -100,12 +111,15 @@ export const schemes: Scheme[] = [
     deadline: "2025-06-30",
     eligibility: {
       income: ["below-1-lakh", "1-2.5-lakh", "2.5-5-lakh", "5-8-lakh"],
+      minAge: 18,
+      maxAge: 40,
     },
     benefits: "₹1,000 - ₹5,000/month pension after 60",
     benefitsHi: "60 के बाद ₹1,000 - ₹5,000/माह पेंशन",
     status: "ongoing",
     type: "pension",
     documents: ["Aadhaar Card", "Bank Passbook", "Mobile Number"],
+    websiteUrl: "https://www.npscra.nsdl.co.in/",
   },
   {
     id: "6",
@@ -117,12 +131,14 @@ export const schemes: Scheme[] = [
     deadline: "2025-12-31",
     eligibility: {
       gender: ["female"],
+      maxAge: 10,
     },
     benefits: "8.2% interest rate + Tax benefits",
     benefitsHi: "8.2% ब्याज दर + कर लाभ",
     status: "new",
     type: "welfare",
     documents: ["Birth Certificate", "Aadhaar Card", "Parent's ID Proof", "Address Proof"],
+    websiteUrl: "https://www.indiapost.gov.in/",
   },
   {
     id: "7",
@@ -134,12 +150,14 @@ export const schemes: Scheme[] = [
     deadline: "2025-12-31",
     eligibility: {
       income: ["below-1-lakh", "1-2.5-lakh"],
+      minAge: 18,
     },
     benefits: "100 days work at ₹267/day (varies by state)",
     benefitsHi: "₹267/दिन पर 100 दिन का काम (राज्य के अनुसार भिन्न)",
     status: "ongoing",
     type: "welfare",
     documents: ["Aadhaar Card", "Ration Card", "Passport Photo", "Bank Passbook"],
+    websiteUrl: "https://nrega.nic.in/",
   },
   {
     id: "8",
@@ -152,12 +170,14 @@ export const schemes: Scheme[] = [
     eligibility: {
       income: ["below-1-lakh", "1-2.5-lakh"],
       category: ["obc"],
+      maxAge: 18,
     },
     benefits: "₹100-500/month + Book allowance",
     benefitsHi: "₹100-500/माह + पुस्तक भत्ता",
     status: "closing-soon",
     type: "scholarship",
     documents: ["OBC Certificate", "Income Certificate", "Marksheet", "Aadhaar Card"],
+    websiteUrl: "https://scholarships.gov.in/",
   },
 ];
 

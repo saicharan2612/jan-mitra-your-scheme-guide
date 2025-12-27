@@ -15,6 +15,9 @@ interface UserProfile {
   gender: string;
   dateOfBirth: string;
   mobile: string;
+  qualification?: string;
+  isMarried?: string;
+  occupation?: string;
 }
 
 interface AppContextType {
