@@ -17,6 +17,8 @@ export default function ProfilePage() {
     name: user?.name || "",
     fatherName: user?.fatherName || "",
     fatherOccupation: user?.fatherOccupation || "",
+    guardianName: user?.guardianName || "",
+    guardianRelation: user?.guardianRelation || "",
     motherName: user?.motherName || "",
     motherOccupation: user?.motherOccupation || "",
     familyIncome: user?.familyIncome || "",
@@ -175,38 +177,80 @@ export default function ProfilePage() {
             <section>
               <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Family Information</h2>
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>{t("fatherName")}</Label>
-                  <Input
-                    value={formData.fatherName}
-                    onChange={(e) => updateField("fatherName", e.target.value)}
-                    disabled={!isEditing}
-                  />
+                {/* Father/Guardian Details Block */}
+                <div className="md:col-span-2 p-4 bg-muted/30 rounded-lg space-y-4">
+                  <h3 className="font-medium text-sm">Father / Guardian Details</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>{t("fatherName")}</Label>
+                      <Input
+                        value={formData.fatherName}
+                        onChange={(e) => updateField("fatherName", e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("fatherOccupation")}</Label>
+                      <Input
+                        value={formData.fatherOccupation}
+                        onChange={(e) => updateField("fatherOccupation", e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Guardian Name (if different)</Label>
+                      <Input
+                        value={formData.guardianName}
+                        onChange={(e) => updateField("guardianName", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Enter guardian name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Guardian Relation</Label>
+                      <Select value={formData.guardianRelation} onValueChange={(v) => updateField("guardianRelation", v)} disabled={!isEditing}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select relation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="uncle">Uncle</SelectItem>
+                          <SelectItem value="aunt">Aunt</SelectItem>
+                          <SelectItem value="grandfather">Grandfather</SelectItem>
+                          <SelectItem value="grandmother">Grandmother</SelectItem>
+                          <SelectItem value="brother">Brother</SelectItem>
+                          <SelectItem value="sister">Sister</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("fatherOccupation")}</Label>
-                  <Input
-                    value={formData.fatherOccupation}
-                    onChange={(e) => updateField("fatherOccupation", e.target.value)}
-                    disabled={!isEditing}
-                  />
+
+                {/* Mother Details Block (Optional) */}
+                <div className="md:col-span-2 p-4 bg-muted/30 rounded-lg space-y-4">
+                  <h3 className="font-medium text-sm">{t("motherName")} <span className="text-muted-foreground">(Optional)</span></h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>{t("motherName")}</Label>
+                      <Input
+                        value={formData.motherName}
+                        onChange={(e) => updateField("motherName", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Enter mother's name (optional)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("motherOccupation")}</Label>
+                      <Input
+                        value={formData.motherOccupation}
+                        onChange={(e) => updateField("motherOccupation", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Enter mother's occupation (optional)"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("motherName")}</Label>
-                  <Input
-                    value={formData.motherName}
-                    onChange={(e) => updateField("motherName", e.target.value)}
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("motherOccupation")}</Label>
-                  <Input
-                    value={formData.motherOccupation}
-                    onChange={(e) => updateField("motherOccupation", e.target.value)}
-                    disabled={!isEditing}
-                  />
-                </div>
+
                 <div className="space-y-2 md:col-span-2">
                   <Label>{t("familyIncome")}</Label>
                   <Select value={formData.familyIncome} onValueChange={(v) => updateField("familyIncome", v)} disabled={!isEditing}>

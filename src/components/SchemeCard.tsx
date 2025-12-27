@@ -191,6 +191,18 @@ export default function SchemeCard({ scheme, title, description, urgent }: Schem
               </span>
             </div>
 
+            {/* Application Process */}
+            <div>
+              <h4 className="font-semibold text-sm text-muted-foreground mb-2">How to Apply</h4>
+              <ol className="space-y-2 list-decimal list-inside">
+                {(language === "hi" ? scheme.applicationProcessHi : scheme.applicationProcess).map((step, index) => (
+                  <li key={index} className="text-sm text-foreground">
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
             {/* Required Documents */}
             <div>
               <h4 className="font-semibold text-sm text-muted-foreground mb-2">Required Documents</h4>

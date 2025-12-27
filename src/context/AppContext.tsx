@@ -6,6 +6,8 @@ interface UserProfile {
   name: string;
   fatherName: string;
   fatherOccupation: string;
+  guardianName?: string;
+  guardianRelation?: string;
   motherName: string;
   motherOccupation: string;
   familyIncome: string;
