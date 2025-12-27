@@ -4,10 +4,16 @@ import { useApp } from "@/context/AppContext";
 import { schemes } from "@/data/schemes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import SchemeCard from "@/components/SchemeCard";
 import Sidebar from "@/components/Sidebar";
 import ChatbotPanel from "@/components/ChatbotPanel";
 import DeadlineAlert from "@/components/DeadlineAlert";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { 
   Search, 
   Bell, 
@@ -16,7 +22,13 @@ import {
   TrendingUp,
   Clock,
   Star,
-  ChevronRight
+  ChevronRight,
+  X,
+  GraduationCap,
+  Landmark,
+  Home,
+  Wallet,
+  Check
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -25,6 +37,12 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showChatbot, setShowChatbot] = useState(false);
   const [showDeadlineAlert, setShowDeadlineAlert] = useState(true);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState([
+    { id: "1", type: "deadline", schemeId: "8", read: false },
+    { id: "2", type: "deadline", schemeId: "4", read: false },
+    { id: "3", type: "new", schemeId: "6", read: false },
+  ]);
 
   // Filter schemes based on user profile
   const getRecommendedSchemes = () => {
@@ -61,12 +79,47 @@ export default function DashboardPage() {
   const newSchemes = schemes.filter(s => s.status === "new");
   const savedSchemes = schemes.filter(s => bookmarkedSchemes.includes(s.id));
 
-  const filteredSchemes = searchQuery
-    ? recommendedSchemes.filter(s => 
-        (language === "hi" ? s.titleHi : s.title).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (language === "hi" ? s.descriptionHi : s.description).toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : recommendedSchemes;
+  // Apply type filters
+  const applyFilters = (schemeList: typeof schemes) => {
+    if (selectedFilters.length === 0) return schemeList;
+    return schemeList.filter(s => selectedFilters.includes(s.type));
+  };
+
+  const filteredSchemes = applyFilters(
+    searchQuery
+      ? recommendedSchemes.filter(s => 
+          (language === "hi" ? s.titleHi : s.title).toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (language === "hi" ? s.descriptionHi : s.description).toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : recommendedSchemes
+  );
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const toggleFilter = (filter: string) => {
+    setSelectedFilters(prev => 
+      prev.includes(filter) 
+        ? prev.filter(f => f !== filter)
+        : [...prev, filter]
+    );
+  };
+
+  const clearFilters = () => setSelectedFilters([]);
+
+  const filterOptions = [
+    { id: "scholarship", label: language === "hi" ? "छात्रवृत्ति" : "Scholarship", icon: GraduationCap },
+    { id: "welfare", label: language === "hi" ? "कल्याण" : "Welfare", icon: Landmark },
+    { id: "subsidy", label: language === "hi" ? "सब्सिडी" : "Subsidy", icon: Home },
+    { id: "pension", label: language === "hi" ? "पेंशन" : "Pension", icon: Wallet },
+  ];
 
   const getTitle = (scheme: typeof schemes[0]) => language === "hi" ? scheme.titleHi : scheme.title;
   const getDescription = (scheme: typeof schemes[0]) => language === "hi" ? scheme.descriptionHi : scheme.description;
@@ -95,15 +148,155 @@ export default function DashboardPage() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon-lg" className="relative">
-                <Bell className="h-6 w-6" />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-destructive rounded-full" />
-              </Button>
-              <Button variant="ghost" size="icon-lg">
-                <Filter className="h-6 w-6" />
-              </Button>
+              {/* Notifications */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon-lg" className="relative">
+                    <Bell className="h-6 w-6" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2 right-2 w-5 h-5 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center font-medium">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="flex items-center justify-between p-3 border-b border-border">
+                    <h3 className="font-semibold">
+                      {language === "hi" ? "सूचनाएं" : "Notifications"}
+                    </h3>
+                    {unreadCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
+                        {language === "hi" ? "सभी पढ़ें" : "Mark all read"}
+                      </Button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="p-4 text-center text-muted-foreground text-sm">
+                        {language === "hi" ? "कोई सूचना नहीं" : "No notifications"}
+                      </p>
+                    ) : (
+                      notifications.map(notif => {
+                        const scheme = schemes.find(s => s.id === notif.schemeId);
+                        if (!scheme) return null;
+                        const daysLeft = Math.ceil(
+                          (new Date(scheme.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                        );
+                        return (
+                          <div
+                            key={notif.id}
+                            className={`p-3 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors ${
+                              !notif.read ? "bg-primary/5" : ""
+                            }`}
+                            onClick={() => {
+                              markAsRead(notif.id);
+                              navigate("/schemes");
+                            }}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                notif.type === "deadline" ? "bg-warning/20 text-warning" : "bg-accent/20 text-accent"
+                              }`}>
+                                {notif.type === "deadline" ? <Clock className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium line-clamp-1">
+                                  {language === "hi" ? scheme.titleHi : scheme.title}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {notif.type === "deadline" 
+                                    ? (language === "hi" ? `${daysLeft} दिन शेष` : `${daysLeft} days left`)
+                                    : (language === "hi" ? "नई योजना उपलब्ध" : "New scheme available")
+                                  }
+                                </p>
+                              </div>
+                              {!notif.read && (
+                                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  <div className="p-2 border-t border-border">
+                    <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate("/deadlines")}>
+                      {language === "hi" ? "सभी देखें" : "View all deadlines"}
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Filter */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon-lg" className="relative">
+                    <Filter className="h-6 w-6" />
+                    {selectedFilters.length > 0 && (
+                      <span className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full text-[10px] text-primary-foreground flex items-center justify-center font-medium">
+                        {selectedFilters.length}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-0" align="end">
+                  <div className="flex items-center justify-between p-3 border-b border-border">
+                    <h3 className="font-semibold">
+                      {language === "hi" ? "फ़िल्टर" : "Filter Schemes"}
+                    </h3>
+                    {selectedFilters.length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs">
+                        <X className="h-3 w-3 mr-1" />
+                        {language === "hi" ? "साफ करें" : "Clear"}
+                      </Button>
+                    )}
+                  </div>
+                  <div className="p-2 space-y-1">
+                    {filterOptions.map(option => {
+                      const isSelected = selectedFilters.includes(option.id);
+                      const Icon = option.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => toggleFilter(option.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                            isSelected 
+                              ? "bg-primary/10 text-primary" 
+                              : "hover:bg-muted"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="flex-1 text-left text-sm">{option.label}</span>
+                          {isSelected && <Check className="h-4 w-4" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
+
+          {/* Active Filters */}
+          {selectedFilters.length > 0 && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              <span className="text-sm text-muted-foreground">
+                {language === "hi" ? "फ़िल्टर:" : "Filters:"}
+              </span>
+              {selectedFilters.map(filter => {
+                const option = filterOptions.find(o => o.id === filter);
+                return (
+                  <Badge key={filter} variant="secondary" className="gap-1">
+                    {option?.label}
+                    <button onClick={() => toggleFilter(filter)} className="ml-1 hover:text-destructive">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })}
+            </div>
+          )}
         </header>
 
         {/* Page Content */}
