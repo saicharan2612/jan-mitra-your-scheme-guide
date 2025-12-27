@@ -10,6 +10,11 @@ import SignupPage from "./pages/SignupPage";
 import LanguageSelectPage from "./pages/LanguageSelectPage";
 import DashboardPage from "./pages/DashboardPage";
 import OfficesPage from "./pages/OfficesPage";
+import ProfilePage from "./pages/ProfilePage";
+import DeadlinesPage from "./pages/DeadlinesPage";
+import SchemesPage from "./pages/SchemesPage";
+import BookmarksPage from "./pages/BookmarksPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,11 +33,11 @@ const App = () => (
             <Route path="/language-select" element={<LanguageSelectPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/offices" element={<OfficesPage />} />
-            <Route path="/profile" element={<DashboardPage />} />
-            <Route path="/deadlines" element={<DashboardPage />} />
-            <Route path="/schemes" element={<DashboardPage />} />
-            <Route path="/bookmarks" element={<DashboardPage />} />
-            <Route path="/settings" element={<DashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/deadlines" element={<DeadlinesPage />} />
+            <Route path="/schemes" element={<SchemesPage />} />
+            <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
