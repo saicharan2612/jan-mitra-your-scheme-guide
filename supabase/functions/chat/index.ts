@@ -64,6 +64,28 @@ serve(async (req) => {
     // Limit message history to prevent abuse
     const limitedMessages = messages.slice(-20);
 
+    // Validate each message for content, length, and role
+    for (const msg of limitedMessages) {
+      if (!msg.content || typeof msg.content !== 'string') {
+        return new Response(JSON.stringify({ error: 'Invalid message format' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (msg.content.length > 2000) {
+        return new Response(JSON.stringify({ error: 'Message too long (max 2000 characters)' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (!['user', 'assistant', 'system'].includes(msg.role)) {
+        return new Response(JSON.stringify({ error: 'Invalid message role' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
