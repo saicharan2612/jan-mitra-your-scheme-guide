@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      user_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          scheme_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          scheme_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          scheme_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          category: string | null
+          created_at: string
+          date_of_birth: string | null
+          district: string | null
+          email: string
+          family_income: string | null
+          father_name: string | null
+          father_occupation: string | null
+          gender: string | null
+          guardian_name: string | null
+          guardian_relation: string | null
+          id: string
+          is_married: string | null
+          mobile: string | null
+          mother_name: string | null
+          mother_occupation: string | null
+          name: string
+          occupation: string | null
+          qualification: string | null
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          district?: string | null
+          email: string
+          family_income?: string | null
+          father_name?: string | null
+          father_occupation?: string | null
+          gender?: string | null
+          guardian_name?: string | null
+          guardian_relation?: string | null
+          id: string
+          is_married?: string | null
+          mobile?: string | null
+          mother_name?: string | null
+          mother_occupation?: string | null
+          name: string
+          occupation?: string | null
+          qualification?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          district?: string | null
+          email?: string
+          family_income?: string | null
+          father_name?: string | null
+          father_occupation?: string | null
+          gender?: string | null
+          guardian_name?: string | null
+          guardian_relation?: string | null
+          id?: string
+          is_married?: string | null
+          mobile?: string | null
+          mother_name?: string | null
+          mother_occupation?: string | null
+          name?: string
+          occupation?: string | null
+          qualification?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_scheme_applications: {
+        Row: {
+          created_at: string
+          id: string
+          scheme_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          scheme_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          scheme_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

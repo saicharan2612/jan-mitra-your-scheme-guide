@@ -34,16 +34,38 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (profile: UserProfile, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  updateProfile: (profile: Partial<UserProfile>) => void;
+  updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
   t: (key: TranslationKey) => string;
   bookmarkedSchemes: string[];
-  toggleBookmark: (schemeId: string) => void;
+  toggleBookmark: (schemeId: string) => Promise<void>;
   appliedSchemes: Record<string, "not-applied" | "in-progress" | "applied">;
-  updateSchemeStatus: (schemeId: string, status: "not-applied" | "in-progress" | "applied") => void;
+  updateSchemeStatus: (schemeId: string, status: "not-applied" | "in-progress" | "applied") => Promise<void>;
   isLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+// Helper function to convert database row to UserProfile
+const dbRowToUserProfile = (row: any): UserProfile => ({
+  email: row.email || '',
+  name: row.name || '',
+  fatherName: row.father_name || '',
+  fatherOccupation: row.father_occupation || '',
+  guardianName: row.guardian_name || undefined,
+  guardianRelation: row.guardian_relation || undefined,
+  motherName: row.mother_name || '',
+  motherOccupation: row.mother_occupation || '',
+  familyIncome: row.family_income || '',
+  state: row.state || '',
+  district: row.district || '',
+  category: row.category || '',
+  gender: row.gender || '',
+  dateOfBirth: row.date_of_birth || '',
+  mobile: row.mobile || '',
+  qualification: row.qualification || undefined,
+  isMarried: row.is_married || undefined,
+  occupation: row.occupation || undefined,
+});
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -55,87 +77,129 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [appliedSchemes, setAppliedSchemes] = useState<Record<string, "not-applied" | "in-progress" | "applied">>({});
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load user profile from database
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error loading user profile:', error);
+        return null;
+      }
+
+      return data ? dbRowToUserProfile(data) : null;
+    } catch (err) {
+      console.error('Error loading user profile:', err);
+      return null;
+    }
+  };
+
+  // Load user bookmarks from database
+  const loadBookmarks = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_bookmarks')
+        .select('scheme_id')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error loading bookmarks:', error);
+        return [];
+      }
+
+      return data ? data.map(b => b.scheme_id) : [];
+    } catch (err) {
+      console.error('Error loading bookmarks:', err);
+      return [];
+    }
+  };
+
+  // Load user scheme applications from database
+  const loadSchemeApplications = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_scheme_applications')
+        .select('scheme_id, status')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error loading scheme applications:', error);
+        return {};
+      }
+
+      const applications: Record<string, "not-applied" | "in-progress" | "applied"> = {};
+      if (data) {
+        data.forEach(app => {
+          applications[app.scheme_id] = app.status as "not-applied" | "in-progress" | "applied";
+        });
+      }
+      return applications;
+    } catch (err) {
+      console.error('Error loading scheme applications:', err);
+      return {};
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         setSession(currentSession);
         setSupabaseUser(currentSession?.user ?? null);
         setIsAuthenticated(!!currentSession?.user);
         
-        // Load user profile from metadata if available
         if (currentSession?.user) {
-          const metadata = currentSession.user.user_metadata;
-          if (metadata && metadata.profile) {
-            setUser(metadata.profile as UserProfile);
-          } else if (metadata?.email) {
-            // Construct minimal profile from available data
-            setUser({
-              email: currentSession.user.email || '',
-              name: metadata.name || '',
-              fatherName: metadata.fatherName || '',
-              fatherOccupation: metadata.fatherOccupation || '',
-              motherName: metadata.motherName || '',
-              motherOccupation: metadata.motherOccupation || '',
-              familyIncome: metadata.familyIncome || '',
-              state: metadata.state || '',
-              district: metadata.district || '',
-              category: metadata.category || '',
-              gender: metadata.gender || '',
-              dateOfBirth: metadata.dateOfBirth || '',
-              mobile: metadata.mobile || '',
-            });
-          }
+          // Load profile from database using setTimeout to avoid auth deadlock
+          setTimeout(async () => {
+            const profile = await loadUserProfile(currentSession.user.id);
+            if (profile) {
+              setUser(profile);
+            }
+            
+            // Load bookmarks and applications
+            const bookmarks = await loadBookmarks(currentSession.user.id);
+            setBookmarkedSchemes(bookmarks);
+            
+            const applications = await loadSchemeApplications(currentSession.user.id);
+            setAppliedSchemes(applications);
+          }, 0);
         } else {
           setUser(null);
+          setBookmarkedSchemes([]);
+          setAppliedSchemes({});
         }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
       setSession(existingSession);
       setSupabaseUser(existingSession?.user ?? null);
       setIsAuthenticated(!!existingSession?.user);
       
       if (existingSession?.user) {
-        const metadata = existingSession.user.user_metadata;
-        if (metadata && metadata.profile) {
-          setUser(metadata.profile as UserProfile);
-        } else if (metadata?.email || existingSession.user.email) {
-          setUser({
-            email: existingSession.user.email || '',
-            name: metadata?.name || '',
-            fatherName: metadata?.fatherName || '',
-            fatherOccupation: metadata?.fatherOccupation || '',
-            motherName: metadata?.motherName || '',
-            motherOccupation: metadata?.motherOccupation || '',
-            familyIncome: metadata?.familyIncome || '',
-            state: metadata?.state || '',
-            district: metadata?.district || '',
-            category: metadata?.category || '',
-            gender: metadata?.gender || '',
-            dateOfBirth: metadata?.dateOfBirth || '',
-            mobile: metadata?.mobile || '',
-          });
+        const profile = await loadUserProfile(existingSession.user.id);
+        if (profile) {
+          setUser(profile);
         }
+        
+        const bookmarks = await loadBookmarks(existingSession.user.id);
+        setBookmarkedSchemes(bookmarks);
+        
+        const applications = await loadSchemeApplications(existingSession.user.id);
+        setAppliedSchemes(applications);
       }
       setIsLoading(false);
     });
 
-    // Load non-auth data from localStorage
+    // Load language preference from localStorage
     const savedLanguage = localStorage.getItem("janmitra_language") as Language;
-    const savedBookmarks = localStorage.getItem("janmitra_bookmarks");
-    const savedApplied = localStorage.getItem("janmitra_applied");
-    
     if (savedLanguage) {
       setLanguage(savedLanguage);
-    }
-    if (savedBookmarks) {
-      setBookmarkedSchemes(JSON.parse(savedBookmarks));
-    }
-    if (savedApplied) {
-      setAppliedSchemes(JSON.parse(savedApplied));
     }
 
     return () => subscription.unsubscribe();
@@ -180,7 +244,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            profile,
             name: profile.name,
             fatherName: profile.fatherName,
             fatherOccupation: profile.fatherOccupation,
@@ -220,20 +283,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSupabaseUser(null);
     setSession(null);
+    setBookmarkedSchemes([]);
+    setAppliedSchemes({});
   };
 
   const updateProfile = async (profile: Partial<UserProfile>) => {
-    if (user) {
-      const updatedUser = { ...user, ...profile };
-      setUser(updatedUser);
+    if (!supabaseUser) return;
+
+    try {
+      // Update in database
+      const updateData: Record<string, any> = {};
       
-      // Update user metadata in Supabase
-      await supabase.auth.updateUser({
-        data: {
-          profile: updatedUser,
-          ...profile,
-        },
-      });
+      if (profile.name !== undefined) updateData.name = profile.name;
+      if (profile.fatherName !== undefined) updateData.father_name = profile.fatherName;
+      if (profile.fatherOccupation !== undefined) updateData.father_occupation = profile.fatherOccupation;
+      if (profile.guardianName !== undefined) updateData.guardian_name = profile.guardianName;
+      if (profile.guardianRelation !== undefined) updateData.guardian_relation = profile.guardianRelation;
+      if (profile.motherName !== undefined) updateData.mother_name = profile.motherName;
+      if (profile.motherOccupation !== undefined) updateData.mother_occupation = profile.motherOccupation;
+      if (profile.familyIncome !== undefined) updateData.family_income = profile.familyIncome;
+      if (profile.state !== undefined) updateData.state = profile.state;
+      if (profile.district !== undefined) updateData.district = profile.district;
+      if (profile.category !== undefined) updateData.category = profile.category;
+      if (profile.gender !== undefined) updateData.gender = profile.gender;
+      if (profile.dateOfBirth !== undefined) updateData.date_of_birth = profile.dateOfBirth || null;
+      if (profile.mobile !== undefined) updateData.mobile = profile.mobile;
+      if (profile.qualification !== undefined) updateData.qualification = profile.qualification;
+      if (profile.isMarried !== undefined) updateData.is_married = profile.isMarried;
+      if (profile.occupation !== undefined) updateData.occupation = profile.occupation;
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('id', supabaseUser.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        return;
+      }
+
+      // Update local state
+      if (user) {
+        setUser({ ...user, ...profile });
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
     }
   };
 
@@ -253,22 +347,69 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const toggleBookmark = (schemeId: string) => {
-    setBookmarkedSchemes(prev => {
-      const updated = prev.includes(schemeId)
-        ? prev.filter(id => id !== schemeId)
-        : [...prev, schemeId];
-      localStorage.setItem("janmitra_bookmarks", JSON.stringify(updated));
-      return updated;
-    });
+  const toggleBookmark = async (schemeId: string) => {
+    if (!supabaseUser) return;
+
+    try {
+      const isBookmarked = bookmarkedSchemes.includes(schemeId);
+      
+      if (isBookmarked) {
+        // Remove bookmark
+        const { error } = await supabase
+          .from('user_bookmarks')
+          .delete()
+          .eq('user_id', supabaseUser.id)
+          .eq('scheme_id', schemeId);
+
+        if (error) {
+          console.error('Error removing bookmark:', error);
+          return;
+        }
+        
+        setBookmarkedSchemes(prev => prev.filter(id => id !== schemeId));
+      } else {
+        // Add bookmark
+        const { error } = await supabase
+          .from('user_bookmarks')
+          .insert({ user_id: supabaseUser.id, scheme_id: schemeId });
+
+        if (error) {
+          console.error('Error adding bookmark:', error);
+          return;
+        }
+        
+        setBookmarkedSchemes(prev => [...prev, schemeId]);
+      }
+    } catch (err) {
+      console.error('Error toggling bookmark:', err);
+    }
   };
 
-  const updateSchemeStatus = (schemeId: string, status: "not-applied" | "in-progress" | "applied") => {
-    setAppliedSchemes(prev => {
-      const updated = { ...prev, [schemeId]: status };
-      localStorage.setItem("janmitra_applied", JSON.stringify(updated));
-      return updated;
-    });
+  const updateSchemeStatus = async (schemeId: string, status: "not-applied" | "in-progress" | "applied") => {
+    if (!supabaseUser) return;
+
+    try {
+      // Upsert the status
+      const { error } = await supabase
+        .from('user_scheme_applications')
+        .upsert(
+          { 
+            user_id: supabaseUser.id, 
+            scheme_id: schemeId, 
+            status 
+          },
+          { onConflict: 'user_id,scheme_id' }
+        );
+
+      if (error) {
+        console.error('Error updating scheme status:', error);
+        return;
+      }
+
+      setAppliedSchemes(prev => ({ ...prev, [schemeId]: status }));
+    } catch (err) {
+      console.error('Error updating scheme status:', err);
+    }
   };
 
   return (
