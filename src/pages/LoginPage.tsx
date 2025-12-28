@@ -28,7 +28,7 @@ export default function LoginPage() {
           title: t("welcome"),
           description: "Login successful!",
         });
-        navigate("/language-select");
+        navigate("/dashboard");
       } else {
         toast({
           title: "Login Failed",
