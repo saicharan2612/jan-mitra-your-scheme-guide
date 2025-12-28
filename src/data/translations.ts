@@ -203,5 +203,5 @@ export const translations = {
   },
 };
 
-export type Language = "en" | "hi";
+export type Language = "en" | "hi" | "ta" | "te" | "bn" | "mr" | "gu" | "kn" | "ml" | "pa" | "or" | "as";
 export type TranslationKey = keyof typeof translations.en;
