@@ -3,6 +3,13 @@ import { translations, Language, TranslationKey } from "@/data/translations";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 
+// Development-only logging helper
+const devLog = (message: string, ...args: unknown[]) => {
+  if (import.meta.env.DEV) {
+    console.error(message, ...args);
+  }
+};
+
 interface UserProfile {
   email: string;
   name: string;
@@ -87,13 +94,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error loading user profile:', error);
+        devLog('Failed to load user profile');
         return null;
       }
 
       return data ? dbRowToUserProfile(data) : null;
-    } catch (err) {
-      console.error('Error loading user profile:', err);
+    } catch {
+      devLog('Failed to load user profile');
       return null;
     }
   };
@@ -107,13 +114,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Error loading bookmarks:', error);
+        devLog('Failed to load bookmarks');
         return [];
       }
 
       return data ? data.map(b => b.scheme_id) : [];
-    } catch (err) {
-      console.error('Error loading bookmarks:', err);
+    } catch {
+      devLog('Failed to load bookmarks');
       return [];
     }
   };
@@ -127,7 +134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Error loading scheme applications:', error);
+        devLog('Failed to load scheme applications');
         return {};
       }
 
@@ -138,8 +145,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
       return applications;
-    } catch (err) {
-      console.error('Error loading scheme applications:', err);
+    } catch {
+      devLog('Failed to load scheme applications');
       return {};
     }
   };
@@ -229,7 +236,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: false, error: "Login failed. Please try again." };
-    } catch (err) {
+    } catch {
       return { success: false, error: "An unexpected error occurred." };
     }
   };
@@ -272,7 +279,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { success: false, error: "Signup failed. Please try again." };
-    } catch (err) {
+    } catch {
       return { success: false, error: "An unexpected error occurred." };
     }
   };
@@ -318,7 +325,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .eq('id', supabaseUser.id);
 
       if (error) {
-        console.error('Error updating profile:', error);
+        devLog('Failed to update profile');
         return;
       }
 
@@ -326,8 +333,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         setUser({ ...user, ...profile });
       }
-    } catch (err) {
-      console.error('Error updating profile:', err);
+    } catch {
+      devLog('Failed to update profile');
     }
   };
 
@@ -362,7 +369,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           .eq('scheme_id', schemeId);
 
         if (error) {
-          console.error('Error removing bookmark:', error);
+          devLog('Failed to remove bookmark');
           return;
         }
         
@@ -374,14 +381,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           .insert({ user_id: supabaseUser.id, scheme_id: schemeId });
 
         if (error) {
-          console.error('Error adding bookmark:', error);
+          devLog('Failed to add bookmark');
           return;
         }
         
         setBookmarkedSchemes(prev => [...prev, schemeId]);
       }
-    } catch (err) {
-      console.error('Error toggling bookmark:', err);
+    } catch {
+      devLog('Failed to toggle bookmark');
     }
   };
 
@@ -402,13 +409,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         );
 
       if (error) {
-        console.error('Error updating scheme status:', error);
+        devLog('Failed to update scheme status');
         return;
       }
 
       setAppliedSchemes(prev => ({ ...prev, [schemeId]: status }));
-    } catch (err) {
-      console.error('Error updating scheme status:', err);
+    } catch {
+      devLog('Failed to update scheme status');
     }
   };
 

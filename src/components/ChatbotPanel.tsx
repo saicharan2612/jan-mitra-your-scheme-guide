@@ -5,6 +5,13 @@ import { Input } from "@/components/ui/input";
 import { X, Send, Mic, MicOff, Bot, User, Volume2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+// Development-only logging helper
+const devLog = (message: string, ...args: unknown[]) => {
+  if (import.meta.env.DEV) {
+    console.error(message, ...args);
+  }
+};
+
 interface Message {
   id: string;
   text: string;
@@ -97,13 +104,13 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
       });
 
       if (error) {
-        console.error('Chat function error:', error);
+        devLog('Chat function error');
         throw error;
       }
 
       if (data?.error) {
         // Handle specific error messages
-        if (data.error.includes('Authentication') || data.error.includes('token')) {
+        if (data.error.includes('Authentication') || data.error.includes('token') || data.code === 'AUTH_FAILED') {
           const authErrorMessage: Message = {
             id: (Date.now() + 1).toString(),
             text: language === "hi"
@@ -127,8 +134,8 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botResponse]);
-    } catch (error) {
-      console.error('Chat error:', error);
+    } catch {
+      devLog('Chat error occurred');
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: language === "hi"
