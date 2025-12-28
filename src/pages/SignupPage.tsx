@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { indianStates, stateDistricts, incomeRanges, categories } from "@/data/indianData";
-import { Eye, EyeOff, ArrowRight, ArrowLeft, User, Users, Briefcase, IndianRupee } from "lucide-react";
+import { indianStates, stateDistricts, incomeRanges, categories, languages } from "@/data/indianData";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, User, Users, Briefcase, IndianRupee, Globe, Check, Volume2 } from "lucide-react";
+import { Language } from "@/data/translations";
 
 export default function SignupPage() {
-  const { signup, t } = useApp();
+  const { signup, t, language, setLanguage } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -41,6 +42,13 @@ export default function SignupPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (field === "state") {
       setFormData(prev => ({ ...prev, district: "" }));
+    }
+  };
+
+  const speakLanguage = (langName: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(langName);
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -99,7 +107,7 @@ export default function SignupPage() {
       {/* Progress Indicator */}
       <div className="px-4 py-4 max-w-md mx-auto w-full">
         <div className="flex items-center justify-between mb-2">
-          {[1, 2, 3].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
               className={`flex-1 h-2 mx-1 rounded-full transition-all ${
@@ -109,7 +117,7 @@ export default function SignupPage() {
           ))}
         </div>
         <p className="text-sm text-muted-foreground text-center">
-          Step {step} of 3
+          Step {step} of 4
         </p>
       </div>
 
@@ -117,8 +125,54 @@ export default function SignupPage() {
       <div className="flex-1 px-4 pb-8 overflow-y-auto">
         <form onSubmit={handleSignup} className="max-w-md mx-auto">
           <div className="bg-card rounded-2xl shadow-lg p-6 border border-border/50 animate-slide-up">
-            {/* Step 1: Account Details */}
+            {/* Step 1: Language Selection */}
             {step === 1 && (
+              <div className="space-y-5">
+                <h3 className="text-xl font-semibold flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  {t("selectLanguage")}
+                </h3>
+                <p className="text-sm text-muted-foreground">{t("languageNote")}</p>
+
+                <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => setLanguage(lang.code as Language)}
+                      className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left group ${
+                        language === lang.code
+                          ? "border-primary bg-primary/5 shadow-md"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                      }`}
+                    >
+                      {language === lang.code && (
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                      
+                      <p className="text-lg font-bold text-foreground">{lang.nativeName}</p>
+                      <p className="text-sm text-muted-foreground">{lang.name}</p>
+                      
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          speakLanguage(lang.name);
+                        }}
+                        className="absolute bottom-2 right-2 p-1.5 rounded-full hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Volume2 className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Account Details */}
+            {step === 2 && (
               <div className="space-y-5">
                 <h3 className="text-xl font-semibold flex items-center gap-2">
                   <User className="h-5 w-5 text-primary" />
@@ -211,8 +265,8 @@ export default function SignupPage() {
               </div>
             )}
 
-            {/* Step 2: Family Details */}
-            {step === 2 && (
+            {/* Step 3: Family Details */}
+            {step === 3 && (
               <div className="space-y-5">
                 <h3 className="text-xl font-semibold flex items-center gap-2">
                   <Users className="h-5 w-5 text-primary" />
@@ -284,8 +338,8 @@ export default function SignupPage() {
               </div>
             )}
 
-            {/* Step 3: Personal & Location Details */}
-            {step === 3 && (
+            {/* Step 4: Personal & Location Details */}
+            {step === 4 && (
               <div className="space-y-5">
                 <h3 className="text-xl font-semibold flex items-center gap-2">
                   <Briefcase className="h-5 w-5 text-primary" />
@@ -389,7 +443,7 @@ export default function SignupPage() {
                 </Button>
               )}
               
-              {step < 3 ? (
+              {step < 4 ? (
                 <Button
                   type="button"
                   variant="accessible"
