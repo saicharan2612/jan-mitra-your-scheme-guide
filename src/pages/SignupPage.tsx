@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft, User, Users, Briefcase, IndianRupee
 import { Language } from "@/data/translations";
 
 export default function SignupPage() {
-  const { signup, t, language, setLanguage } = useApp();
+  const { signup, t, language, setLanguage, isAuthenticated, isLoading: authLoading } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -38,6 +38,13 @@ export default function SignupPage() {
     mobile: "",
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+
   const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (field === "state") {
@@ -52,9 +59,46 @@ export default function SignupPage() {
     }
   };
 
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long.";
+    }
+    return null;
+  };
+
+  const validateEmail = (email: string): string | null => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address.";
+    }
+    return null;
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate email
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      toast({
+        title: "Invalid Email",
+        description: emailError,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate password
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      toast({
+        title: "Invalid Password",
+        description: passwordError,
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -68,18 +112,18 @@ export default function SignupPage() {
     
     try {
       const { confirmPassword: _, password, ...profile } = formData;
-      const success = await signup(profile, password);
+      const result = await signup(profile, password);
       
-      if (success) {
+      if (result.success) {
         toast({
           title: "Account Created!",
-          description: "Please login to continue.",
+          description: "Please check your email to verify your account, then login.",
         });
         navigate("/login");
       } else {
         toast({
           title: "Signup Failed",
-          description: "Email already exists. Please use a different email.",
+          description: result.error || "Could not create account. Please try again.",
           variant: "destructive",
         });
       }
@@ -95,6 +139,14 @@ export default function SignupPage() {
   };
 
   const districts = formData.state ? stateDistricts[formData.state] || [] : [];
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -188,6 +240,7 @@ export default function SignupPage() {
                     onChange={(e) => updateField("name", e.target.value)}
                     placeholder="Enter your full name"
                     required
+                    autoComplete="name"
                   />
                 </div>
 
@@ -201,6 +254,7 @@ export default function SignupPage() {
                     onChange={(e) => updateField("email", e.target.value)}
                     placeholder="example@email.com"
                     required
+                    autoComplete="email"
                   />
                 </div>
 
@@ -214,6 +268,7 @@ export default function SignupPage() {
                     onChange={(e) => updateField("mobile", e.target.value)}
                     placeholder="+91 XXXXX XXXXX"
                     required
+                    autoComplete="tel"
                   />
                 </div>
 
@@ -229,6 +284,7 @@ export default function SignupPage() {
                       placeholder="••••••••"
                       className="pr-12"
                       required
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
@@ -238,6 +294,7 @@ export default function SignupPage() {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
+                  <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
                 </div>
 
                 <div className="space-y-2">
@@ -252,6 +309,7 @@ export default function SignupPage() {
                       placeholder="••••••••"
                       className="pr-12"
                       required
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
@@ -438,8 +496,8 @@ export default function SignupPage() {
                   onClick={() => setStep(step - 1)}
                   className="flex-1"
                 >
-                  <ArrowLeft className="h-5 w-5" />
-                  {t("back")}
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  Back
                 </Button>
               )}
               
@@ -447,26 +505,29 @@ export default function SignupPage() {
                 <Button
                   type="button"
                   variant="accessible"
+                  size="lg"
                   onClick={() => setStep(step + 1)}
                   className="flex-1"
                 >
-                  {t("continue")}
-                  <ArrowRight className="h-5 w-5" />
+                  Continue
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   variant="accessible"
+                  size="lg"
                   className="flex-1"
                   disabled={isLoading}
                 >
-                  {isLoading ? t("loading") : t("createAccount")}
-                  <ArrowRight className="h-5 w-5" />
+                  {isLoading ? "Creating..." : "Create Account"}
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
               )}
             </div>
           </div>
 
+          {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-muted-foreground">
               {t("alreadyHaveAccount")}{" "}

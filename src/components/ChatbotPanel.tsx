@@ -18,7 +18,7 @@ interface ChatbotPanelProps {
 }
 
 export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
-  const { t, language } = useApp();
+  const { t, language, session, isAuthenticated } = useApp();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -40,6 +40,20 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    // Check authentication before sending
+    if (!isAuthenticated || !session) {
+      const authMessage: Message = {
+        id: Date.now().toString(),
+        text: language === "hi"
+          ? "कृपया चैट का उपयोग करने के लिए पहले लॉगिन करें।"
+          : "Please login first to use the chat feature.",
+        isBot: true,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, authMessage]);
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -68,7 +82,27 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Chat function error:', error);
+        throw error;
+      }
+
+      if (data?.error) {
+        // Handle specific error messages
+        if (data.error.includes('Authentication') || data.error.includes('token')) {
+          const authErrorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: language === "hi"
+              ? "आपका सत्र समाप्त हो गया है। कृपया पुनः लॉगिन करें।"
+              : "Your session has expired. Please login again.",
+            isBot: true,
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, authErrorMessage]);
+          return;
+        }
+        throw new Error(data.error);
+      }
 
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -161,6 +195,15 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
         </Button>
       </div>
 
+      {/* Auth warning if not logged in */}
+      {!isAuthenticated && (
+        <div className="px-4 py-2 bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-sm">
+          {language === "hi" 
+            ? "चैट का उपयोग करने के लिए कृपया लॉगिन करें"
+            : "Please login to use the chat feature"}
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
@@ -226,6 +269,7 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
             onClick={toggleVoiceInput}
             className="flex-shrink-0"
             title={language === "hi" ? "आवाज से बोलें" : "Voice input"}
+            disabled={!isAuthenticated}
           >
             {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </Button>
@@ -235,9 +279,9 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
             placeholder={t("askQuestion")}
             className="flex-1"
-            disabled={isLoading}
+            disabled={isLoading || !isAuthenticated}
           />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading}>
+          <Button onClick={handleSend} disabled={!input.trim() || isLoading || !isAuthenticated}>
             {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </Button>
         </div>

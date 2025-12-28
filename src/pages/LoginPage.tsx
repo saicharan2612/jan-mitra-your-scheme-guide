@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
-  const { login, t } = useApp();
+  const { login, t, isAuthenticated, isLoading: authLoading } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -17,13 +17,42 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      const success = await login(email, password);
-      if (success) {
+      const result = await login(email, password);
+      if (result.success) {
         toast({
           title: t("welcome"),
           description: "Login successful!",
@@ -32,7 +61,7 @@ export default function LoginPage() {
       } else {
         toast({
           title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
+          description: result.error || "Invalid email or password. Please try again.",
           variant: "destructive",
         });
       }
@@ -46,6 +75,14 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -77,6 +114,7 @@ export default function LoginPage() {
                     placeholder="example@email.com"
                     className="pl-12"
                     required
+                    autoComplete="email"
                   />
                 </div>
               </div>
@@ -96,6 +134,7 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     className="pl-12 pr-12"
                     required
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
