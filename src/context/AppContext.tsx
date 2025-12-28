@@ -134,7 +134,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang);
     localStorage.setItem("janmitra_language", lang);
+    // Apply language-specific font class to body
+    document.body.className = document.body.className.replace(/lang-\w+/g, '');
+    document.body.classList.add(`lang-${lang}`);
   };
+
+  // Apply language font on initial load
+  useEffect(() => {
+    document.body.classList.add(`lang-${language}`);
+    return () => {
+      document.body.className = document.body.className.replace(/lang-\w+/g, '');
+    };
+  }, []);
 
   const toggleBookmark = (schemeId: string) => {
     setBookmarkedSchemes(prev => {
