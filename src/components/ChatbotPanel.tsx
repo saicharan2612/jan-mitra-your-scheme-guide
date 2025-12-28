@@ -55,6 +55,20 @@ export default function ChatbotPanel({ isOpen, onClose }: ChatbotPanelProps) {
       return;
     }
 
+    // Validate input length (max 2000 characters)
+    if (input.length > 2000) {
+      const lengthMessage: Message = {
+        id: Date.now().toString(),
+        text: language === "hi"
+          ? "संदेश बहुत लंबा है। कृपया 2000 अक्षरों से कम में लिखें।"
+          : "Message too long. Please keep it under 2000 characters.",
+        isBot: true,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, lengthMessage]);
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       text: input,
